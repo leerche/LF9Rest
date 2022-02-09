@@ -6,7 +6,7 @@
     "title": "Checklist",
     "contact": { "email": "lea.rieping@outlook.de" }
   },
-  "host": "localhost",
+  "host": "localhost:5000",
   "basePath": "/v1",
   "schemes": ["http"],
   "paths": {
