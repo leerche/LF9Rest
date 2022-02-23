@@ -1,13 +1,13 @@
 import uuid
+
+from model.ToDoList import ToDoList
 from .User import User
-
-
 class Entry:
 
     
-    def __init__(self, text: str, status: bool, user: User):
+    def __init__(self, text: str, toDoList: ToDoList, user: User):
         self.text = text
-        self.status = status
+        self.list = toDoList
         self.user = user
         self.id = uuid.uuid4().hex
 

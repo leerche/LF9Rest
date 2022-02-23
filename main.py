@@ -1,21 +1,12 @@
 
-from flask import Flask, Request, Response, request
+from flask import Flask, Response, request
 from json import dumps
 from model.User import User
 from model.Entry import Entry
 from model.ToDoList import ToDoList
-from distutils.util import strtobool
-
 
 def default(o):
     return o._asdict()
-
-users = [
-    User("Rieping", "Lea", "LR", "Lea.Rieping@outlook.de"),
-    User("Rieping", "Malte", "MR", "Malte.Rieping@outlook.de"),
-    User("Rieping", "Michi", "MR2", "Michi.Rieping@outlook.de"),
-    User("Rieping", "Hanno", "HR", "Hanno.Rieping@outlook.de")
-]
 
 def findUser(id):
     for user in users:
@@ -23,15 +14,40 @@ def findUser(id):
             return user
     return None
 
+def findList(id):
+    for list in lists:
+        if list.id == id:
+            return list
+    return None
 
-entries = [
-    Entry("Einkaufen gehen", "NOT DONE", users[0]),
-    Entry("Schlafen :)", ":D", users[1])
+def findEntry(id):
+    for entry in entries:
+        if entry.id == id:
+            return entry
+    return None
+
+def findEntries(id):
+    foundEntries = list()
+    for entry in entries:
+        if entry.list.id == id:
+            foundEntries.append(entry)
+    return foundEntries
+
+users = [
+    User("Lea Rieping"),
+    User("Malte Rieping"),
+    User("Hanno Rieping"),
+    User("Michi Rieping")
 ]
 
 lists = [
-    ToDoList("Alte Liste", [entries[0], entries[1]]),
-    ToDoList("Neue Liste", [entries[0]])
+    ToDoList("Alte Liste"),
+    ToDoList("Neue Liste")
+]
+
+entries = [
+    Entry("Einkaufen gehen", users[0], lists[0]),
+    Entry("Schlafen :)", users[1], lists[1])
 ]
 
 app = Flask(__name__)
@@ -43,18 +59,17 @@ def getAllUsers():
 @app.route('/v1/user', methods = ['POST'])
 def addUser():
     args = request.form
-    users.append(User(args.get('lastName'), args.get('firstName'), args.get('username'), args.get('email')))
+    users.append(User(args.get('name')))
     return Response(dumps(users[-1], default=default), status=200, mimetype='application/json')
 
 @app.route('/v1/user/<id>', methods = ['DELETE'])
 def deleteUser(id):
     for index, user in enumerate(users, start=0):
-        if int(user.id) == int(id):
+        if user.id == id:
             del users[index]
             break
         else:
             user = None
-
     if user == None:
         return Response(status=404)
     return Response(None, status=200, mimetype='application/json')
@@ -69,37 +84,35 @@ def singleList(id):
 def getList(id):
     for list in lists:
         if list.id == id:
-            return Response(dumps(list, default=default), status=200, mimetype='application/json')
+            entries = findEntries(list.id)
+            return Response(dumps(entries, default=default), status=200, mimetype='application/json')
     return Response(status=404)
 
 def deleteList(id):
     for index, list in enumerate(lists, start=0):
         if list.id == id:
             del lists[index]
-            break
+            return Response(None, status=200, mimetype='application/json')
         else:
             list = None
-
     if list == None:
         return Response(status=404)
-    return Response(None, status=200, mimetype='application/json')
+
 
 @app.route('/v1/list', methods = ['POST'])
 def addList():
     args = request.form
-    lists.append(ToDoList(args.get('name'), []))
+    lists.append(ToDoList(args.get('name')))
     return Response(dumps(lists[-1], default=default), status=200, mimetype='application/json')
 
 @app.route('/v1/list/<id>/entry', methods = ['POST'])
 def addEntry(id):
     args = request.form
-
-    for list in lists:
-        if list.id == id:
-            user = findUser(args.get('user'))
-            if user != None:
-                list.entries.append(Entry(args.get('text'), strtobool(args.get('status')), user))
-                return Response(dumps(list.entries[-1], default=default), status=200, mimetype='application/json')
+    user = findUser(args.get('user'))
+    toDoList = findList(id)
+    if user != None and toDoList != None:
+        entries.append(Entry(args.get('text'), toDoList, user))
+        return Response(dumps(entries[-1], default=default), status=200, mimetype='application/json')
     # nicht in unserer Spezifikation
     return Response(status=404)
 
@@ -110,32 +123,24 @@ def singleEntry(id, entryId):
     elif request.method == 'DELETE':
         return deleteEntry(id, entryId)
 
-
 def updateEntry(id, entryId):
     args = request.form
-    for list in lists:
-        if list.id == id:
-            for entry in list.entries:
-                if entry.id == entryId:
-                    entry.status =  strtobool(args.get('status'))
-                    user = findUser(args.get('user'))
-                    if user != None:
-                        entry.user = user
-                    entry.text = args.get('text')
-                    return Response(dumps(entry, default=default), status=200, mimetype='application/json')
-    return Response(status=404)
-
-
+    entry = findEntry(entryId)
+    if entry == None:
+        return Response(status=404)
+    user = findUser(args.get('user'))
+    if user != None:
+        entry.user = user
+    if(args.get('text')):
+        entry.text = args.get('text')
+    return Response(dumps(entry, default=default), status=200, mimetype='application/json')
+                    
 def deleteEntry(id, entryId):
-    for list in lists:
-        if list.id == id:
-            for index, entry in enumerate(list.entries, start=0):
-                if entry.id == entryId:
-                    del list.entries[index]
-                    return Response(None, status=200, mimetype='application/json')
+    for index, entry in enumerate(entries, start=0):
+        if entry.id == entryId:
+            del entries[index]
+            return Response(None, status=200, mimetype='application/json')
     return Response(status=404)
-
-
 
 if __name__ == '__main__':
     # starte Flask-ServerS
