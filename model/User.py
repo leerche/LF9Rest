@@ -1,12 +1,13 @@
-class User:
+import uuid
 
-    def __init__(self, name: str, firstName: str, username: str, email: str, id: int):
-        self.name = name
+class User:
+    def __init__(self, lastName: str, firstName: str, username: str, email: str):
+
+        self.lastName = lastName
         self.firstName = firstName
         self.username = username
         self.email = email
-        self.id = id
-
+        self.id = uuid.uuid4().hex
     
     def _asdict(self):
         return self.__dict__
