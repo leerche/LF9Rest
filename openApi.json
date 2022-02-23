@@ -22,8 +22,8 @@
             "in": "path",
             "description": "ID of the list to get",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -52,8 +52,8 @@
             "in": "path",
             "description": "ID of the list to delete",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -79,13 +79,13 @@
             "name": "list",
             "description": "List object that should be created",
             "required": true,
-            "schema": { "$ref": "#/definitions/list" }
+            "schema": { "$ref": "#/definitions/toDoList" }
           }
         ],
         "responses": {
           "200": {
             "description": "Invalid input",
-            "schema": { "$ref": "#/definitions/list" }
+            "schema": { "$ref": "#/definitions/toDoList" }
           },
           "404": {
             "description": "Resource not found"
@@ -106,8 +106,8 @@
             "in": "path",
             "description": "ID of the list",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           {
             "in": "body",
@@ -139,16 +139,16 @@
             "in": "path",
             "description": "ID of the list",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           {
             "name": "entry_id",
             "in": "path",
             "description": "id of the entry",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           {
             "in": "body",
@@ -177,16 +177,16 @@
             "in": "path",
             "description": "ID of the list",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           },
           {
             "name": "entry_id",
             "in": "path",
             "description": "id of the entry",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -246,7 +246,7 @@
     "/user/{user_id}": {
       "delete": {
         "summary": "Delete an user",
-        "description": "Löscht einen Benutzer..",
+        "description": "Löscht einen Benutzer",
         "operationId": "deleteUser",
         "produces": ["application/json"],
         "parameters": [
@@ -255,8 +255,8 @@
             "in": "path",
             "description": "ID of the user",
             "required": true,
-            "type": "integer",
-            "format": "int64"
+            "type": "string",
+            "format": "uuid"
           }
         ],
         "responses": {
@@ -272,31 +272,24 @@
     "user": {
       "type": "object",
       "properties": {
-        "id": { "type": "integer", "format": "int64" },
-        "username": { "type": "string" },
-        "firstName": { "type": "string" },
-        "lastName": { "type": "string" },
-        "email": { "type": "string" }
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" }
       }
     },
     "entry": {
       "type": "object",
       "properties": {
-        "id": { "type": "integer", "format": "int64" },
+        "id": { "type": "string", "format": "uuid" },
         "text": { "type": "string" },
-        "status": { "type": "integer", "format": "int32" },
+        "toDoList": { "$ref": "#/definitions/toDoList" },
         "user": { "$ref": "#/definitions/user" }
       }
     },
-    "list": {
+    "toDoList": {
       "type": "object",
       "properties": {
-        "id": { "type": "integer", "format": "int64" },
-        "name": { "type": "string" },
-        "entries": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/entry" }
-        }
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" }
       }
     }
   }
