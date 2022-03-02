@@ -108,7 +108,7 @@ def addList():
 @app.route('/v1/list/<id>/entry', methods = ['POST'])
 def addEntry(id):
     args = request.form
-    user = findUser(args.get('user'))
+    user = findUser(args.get('userID'))
     toDoList = findList(id)
     if user != None and toDoList != None:
         entries.append(Entry(args.get('text'), toDoList, user))
